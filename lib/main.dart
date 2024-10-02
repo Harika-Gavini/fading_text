@@ -8,10 +8,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, 
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
-        fontFamily: 'Roboto', 
+        fontFamily: 'Roboto',
       ),
       home: FadingTextScreen(),
     );
@@ -23,10 +23,13 @@ class FadingTextScreen extends StatefulWidget {
   _FadingTextScreenState createState() => _FadingTextScreenState();
 }
 
-class _FadingTextScreenState extends State<FadingTextScreen> with SingleTickerProviderStateMixin {
+class _FadingTextScreenState extends State<FadingTextScreen>
+    with SingleTickerProviderStateMixin {
   bool _isVisible = true;
   double _opacityDuration = 2.0;
   String _text = 'Welcome to Flutter Animations!';
+  String _imageAsset =
+      '/Users/harikagavini/Documents/gsu-course-work/mad/fading_text/assets/flutter.png'; // Initial image asset
 
   late AnimationController _controller;
   late Animation<Color?> _backgroundAnimation;
@@ -59,111 +62,136 @@ class _FadingTextScreenState extends State<FadingTextScreen> with SingleTickerPr
     });
   }
 
+  void changeText() {
+    setState(() {
+      if (_text == 'Welcome to Flutter Animations!') {
+        _text = 'Master Flutter Animations!';
+        _imageAsset =
+            '/Users/harikagavini/Documents/gsu-course-work/mad/fading_text/assets/flutter-master.png'; // Change to new image
+      } else {
+        _text = 'Welcome to Flutter Animations!';
+        _imageAsset =
+            '/Users/harikagavini/Documents/gsu-course-work/mad/fading_text/assets/flutter.png'; // Change back to initial image
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, // Extend the background behind the app bar
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Fading Text Animation'),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: AnimatedBuilder(
-        animation: _backgroundAnimation,
-        builder: (context, child) {
-          return Container(
-            // Animated background
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  _backgroundAnimation.value!,
-                  Colors.black54,
-                ],
-              ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Animated Image with FadeTransition
+          AnimatedOpacity(
+            opacity: _isVisible ? 1.0 : 0.0,
+            duration: Duration(seconds: _opacityDuration.toInt()),
+            curve: Curves.easeInOut,
+            child: Image.asset(
+              _imageAsset,
+              fit: BoxFit.cover,
             ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Text with FadeTransition
-                  AnimatedOpacity(
-                    opacity: _isVisible ? 1.0 : 0.0,
-                    duration: Duration(seconds: _opacityDuration.toInt()),
-                    curve: Curves.easeInOut,
-                    child: Text(
-                      _text,
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 10.0,
-                            color: Colors.black38,
-                            offset: Offset(3.0, 3.0),
+          ),
+          // Animated Overlay
+          AnimatedBuilder(
+            animation: _backgroundAnimation,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      _backgroundAnimation.value!,
+                      Colors.black54,
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Text with FadeTransition
+                      AnimatedOpacity(
+                        opacity: _isVisible ? 1.0 : 0.0,
+                        duration: Duration(seconds: _opacityDuration.toInt()),
+                        curve: Curves.easeInOut,
+                        child: Text(
+                          _text,
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10.0,
+                                color: Colors.black38,
+                                offset: Offset(3.0, 3.0),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+
+                      // Outlined Button for toggling text
+                      OutlinedButton(
+                        onPressed: changeText,
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 15),
+                          side: BorderSide(color: Colors.tealAccent),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          'Change Text',
+                          style:
+                              TextStyle(fontSize: 18, color: Colors.tealAccent),
+                        ),
+                      ),
+
+                      // Slider for animation duration
+                      const SizedBox(height: 40),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Animation Duration:',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                          const SizedBox(width: 10),
+                          Slider(
+                            value: _opacityDuration,
+                            min: 1,
+                            max: 5,
+                            divisions: 4,
+                            activeColor: Colors.tealAccent,
+                            label: "${_opacityDuration.toInt()} sec",
+                            onChanged: (value) {
+                              setState(() {
+                                _opacityDuration = value;
+                              });
+                            },
                           ),
                         ],
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Outlined Button for toggling text
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        _text = _text == 'Welcome to Flutter Animations!'
-                            ? 'Master Flutter Animations!'
-                            : 'Welcome to Flutter Animations!';
-                      });
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                      side: BorderSide(color: Colors.tealAccent),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Text(
-                      'Change Text',
-                      style: TextStyle(fontSize: 18, color: Colors.tealAccent),
-                    ),
-                  ),
-
-                  // Slider for animation duration
-                  const SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Animation Duration:',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                      const SizedBox(width: 10),
-                      Slider(
-                        value: _opacityDuration,
-                        min: 1,
-                        max: 5,
-                        divisions: 4,
-                        activeColor: Colors.tealAccent,
-                        label: "${_opacityDuration.toInt()} sec",
-                        onChanged: (value) {
-                          setState(() {
-                            _opacityDuration = value;
-                          });
-                        },
-                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          );
-        },
+                ),
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: toggleVisibility,
